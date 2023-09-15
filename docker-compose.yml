@@ -1,0 +1,38 @@
+version: '3.7'
+
+networks:
+  nest-net:
+    name: nest-net
+
+services:
+  nest:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./src:/home/node/nest-test/src
+    environment:
+      - NODE_ENV=development
+    working_dir: /home/node/nest-test
+    container_name: nest-back
+    networks:
+      - nest-net
+    ports:
+      - 4000:3000
+    tty: true
+
+  mongo:
+    image: mongo:latest
+    container_name: "mongo"
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+      - MONGO_INITDB_ROOT_USERNAME=guest
+      - MONGO_INITDB_ROOT_PASSWORD=guest
+    networks:
+      - nest-net
+    volumes:
+      - ./mongodb/data/db:/data/db
+    ports:
+      - 3500:27017
+    command: mongod --auth --logpath=/dev/null # --quiet

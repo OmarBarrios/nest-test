@@ -1,0 +1,38 @@
+# node 16.13.2 alpine
+FROM node@sha256:f21f35732964a96306a84a8c4b5a829f6d3a0c5163237ff4b6b8b34f8d70064b as stage1
+RUN mkdir -p /home/node/nest-test/node_modules \
+  && chown -R node:node /home/node/nest-test
+
+WORKDIR /home/node/nest-test
+
+ENV NODE_ENV development
+USER node
+
+COPY package.json ./
+COPY tsconfig.json ./
+COPY .env ./
+COPY --chown=node:node src ./src
+RUN ls -a
+RUN npm install
+RUN npm ci
+
+RUN npm run build
+
+
+FROM node@sha256:f21f35732964a96306a84a8c4b5a829f6d3a0c5163237ff4b6b8b34f8d70064b as stage2
+RUN mkdir -p /home/node/nest-test/node_modules \
+  && chown -R node:node /home/node/nest-test
+
+WORKDIR /home/node/nest-test
+
+ENV NODE_ENV production
+USER node
+COPY .env ./
+COPY package.json ./
+RUN npm install --only=production
+COPY --from=stage1 /home/node/nest-test/dist/ .
+
+EXPOSE 3000
+
+CMD ["npm", "run", "start:docker"]
+
