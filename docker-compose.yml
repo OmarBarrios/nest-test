@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.8'
 
 networks:
   nest-net:
@@ -10,7 +10,11 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     volumes:
+      - ./package.json:/home/node/nest-test/package.json
+      - ./.env:/home/node/nest-test/.env
+      - ./node_modules:/home/node/nest-test/node_modules
       - ./src:/home/node/nest-test/src
+      - ./tests:/home/node/nest-test/tests
     environment:
       - NODE_ENV=development
     working_dir: /home/node/nest-test
@@ -18,21 +22,14 @@ services:
     networks:
       - nest-net
     ports:
-      - 4000:3000
+      - 3000:3000
     tty: true
 
-  mongo:
-    image: mongo:latest
-    container_name: "mongo"
-    environment:
-      - MONGO_DATA_DIR=/data/db
-      - MONGO_LOG_DIR=/dev/null
-      - MONGO_INITDB_ROOT_USERNAME=guest
-      - MONGO_INITDB_ROOT_PASSWORD=guest
-    networks:
-      - nest-net
-    volumes:
-      - ./mongodb/data/db:/data/db
+  mongodb:
+    image: mongo:6-jammy
     ports:
-      - 3500:27017
-    command: mongod --auth --logpath=/dev/null # --quiet
+      - '27017:27017'
+    volumes:
+      - dbdata6:/data/db
+    networks:
+      - node-network
