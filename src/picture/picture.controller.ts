@@ -1,12 +1,40 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Delete,
+  Param,
+  UploadedFile,
+  UseInterceptors,
+  ValidationPipe,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { PictureService } from './picture.service';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('picture')
+@ApiTags('pictures')
+@Controller('pictures')
 export class PictureController {
   constructor(private pictureService: PictureService) {}
 
-  @Post()
-  async create(@Body() createPicture: any) {
-    return this.pictureService.create(createPicture);
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async create(@UploadedFile(new ValidationPipe()) file: Express.Multer.File) {
+    return this.pictureService.create(file);
+  }
+
+  @Get('')
+  async findAll() {
+    return this.pictureService.findAll();
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.pictureService.findOne(id);
+  }
+
+  @Delete(':id')
+  async delete(@Param('id') id: string) {
+    return this.pictureService.delete(id);
   }
 }

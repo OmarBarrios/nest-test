@@ -9,7 +9,7 @@ export class Picture {
   date: Date;
 
   @Prop()
-  data: string;
+  verifyData: string;
 }
 
 export const PictureSchema = SchemaFactory.createForClass(Picture);
